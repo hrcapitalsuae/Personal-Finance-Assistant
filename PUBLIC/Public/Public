@@ -1,2 +1,74 @@
 # Personal-Finance-Assistant
-Personal Finance Assistant App
+## 1. Prerequisites
+- [Node.js 18+](https://nodejs.org/) installed
+- Git + npm (comes with Node)
+- Windows machine (recommended for building Windows `.exe` installers)
+
+---
+
+## 2. Setup project
+1. Clone or unzip the repo:
+   ```bash
+   git clone https://github.com/yourusername/pfa-app.git
+   cd pfa-app/frontend
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Add Electron + build tools:
+   ```bash
+   npm install --save-dev electron electron-builder concurrently wait-on electron-is-dev
+   ```
+
+---
+
+## 3. Configure Electron
+1. Create a folder `frontend/electron` and inside add `main.js`:
+   ```js
+   const { app, BrowserWindow } = require('electron');
+   const path = require('path');
+   const isDev = require('electron-is-dev');
+
+   function createWindow() {
+     const win = new BrowserWindow({
+       width: 1024,
+       height: 768,
+       webPreferences: { nodeIntegration: false, contextIsolation: true }
+     });
+
+     if (isDev) {
+       win.loadURL('http://localhost:3000');
+     } else {
+       win.loadFile(path.join(__dirname, '..', 'build', 'index.html'));
+     }
+   }
+
+   app.whenReady().then(createWindow);
+   ```
+
+2. Update `package.json` in `frontend/` with new scripts:
+   ```json
+   "scripts": {
+     "start": "react-scripts start",
+     "build": "react-scripts build",
+     "electron:dev": "concurrently \"npm start\" \"wait-on http://localhost:3000 && electron ./electron/main.js\"",
+     "electron:build": "npm run build && electron-builder"
+   }
+   ```
+
+3. Add `electron-builder` config in `package.json`:
+   ```json
+   "build": {
+     "appId": "com.yourcompany.pfa",
+     "productName": "Personal Finance Assistant",
+     "directories": { "buildResources": "assets" },
+     "files": [
+       "build/**/*",
+       "electron/**/*"
+     ],
+     "win": { "target": "nsis" }
+   }
+   ```
